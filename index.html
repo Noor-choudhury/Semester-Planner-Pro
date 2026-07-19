@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semester Planner Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-mode">
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span class="logo-text">Semester Planner</span>
+            </div>
+            
+            <div class="nav-controls">
+                <!-- Routine Icon (Primary) -->
+                <button class="nav-icon-btn routine-btn-trigger" title="Class Routine">
+                    <i class="fas fa-book"></i>
+                </button>
+
+                <!-- Notification Bell -->
+                <div class="notification-wrapper">
+                    <button id="notif-btn" class="nav-icon-btn" title="Reminders">
+                        <i class="fas fa-bell"></i>
+                        <span id="notif-count" class="badge pulse">0</span>
+                    </button>
+                    <div id="reminders-panel" class="dropdown-panel hidden">
+                        <div class="panel-header"><h3>Reminders</h3></div>
+                        <div id="reminders-list" class="panel-content"></div>
+                    </div>
+                </div>
+
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="nav-icon-btn" title="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+
+                <!-- More Menu Toggle -->
+                <button id="menu-toggle" class="nav-icon-btn mobile-only" title="More Menu">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+
+                <!-- Desktop-only Controls (Hidden on phone) -->
+                <div class="desktop-controls">
+                    <div class="zoom-controls">
+                        <button class="nav-icon-btn zoom-out-btn"><i class="fas fa-search-minus"></i></button>
+                        <button class="nav-icon-btn zoom-reset-btn">100%</button>
+                        <button class="nav-icon-btn zoom-in-btn"><i class="fas fa-search-plus"></i></button>
+                    </div>
+                    <button class="nav-icon-btn export-btn-trigger" title="Export Data"><i class="fas fa-file-export"></i></button>
+                    <button class="nav-icon-btn import-btn-trigger" title="Import Data"><i class="fas fa-file-import"></i></button>
+                    <button class="btn btn-primary add-task-btn-trigger"><i class="fas fa-plus"></i> Add Task</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Action Menu -->
+    <div id="mobile-menu" class="mobile-menu hidden">
+        <div class="menu-content">
+            <div class="menu-header">
+                <h3>Settings & Tools</h3>
+                <button id="close-menu" class="close-modal">&times;</button>
+            </div>
+            <div class="menu-items">
+                <div class="menu-divider">Zoom Control</div>
+                <div class="zoom-row">
+                    <button class="nav-icon-btn zoom-out-btn"><i class="fas fa-search-minus"></i></button>
+                    <button class="btn btn-secondary zoom-reset-btn" style="flex:1">Reset (100%)</button>
+                    <button class="nav-icon-btn zoom-in-btn"><i class="fas fa-search-plus"></i></button>
+                </div>
+                <div class="menu-divider">Data Transfer</div>
+                <button class="menu-item export-btn-trigger"><i class="fas fa-file-export"></i> Export JSON</button>
+                <button class="menu-item import-btn-trigger"><i class="fas fa-file-import"></i> Import JSON</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile FAB -->
+    <button id="fab-add" class="fab-btn mobile-only add-task-btn-trigger" title="Add Task">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <input type="file" id="import-input" style="display: none;" accept=".json">
+
+    <main class="calendar-wrapper">
+        <header class="calendar-nav">
+            <div class="month-selector">
+                <button id="prev-month" class="nav-btn"><i class="fas fa-chevron-left"></i></button>
+                <h2 id="current-month-year">Month Year</h2>
+                <button id="next-month" class="nav-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <button id="today-btn" class="btn btn-secondary">Today</button>
+        </header>
+
+        <div class="calendar-grid-header">
+            <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+        </div>
+        
+        <div id="calendar-grid" class="calendar-grid"></div>
+
+        <div id="today-schedule-card" class="today-schedule-card">
+            <div class="schedule-header">
+                <h3>Today's Classes</h3>
+                <span id="today-name-badge" class="day-badge"></span>
+            </div>
+            <div id="classes-list" class="classes-list"></div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div id="task-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">New Task</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="task-form">
+                <input type="hidden" id="edit-id">
+                <div class="form-group">
+                    <label>Topic</label>
+                    <input type="text" id="task-topic" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="task-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Time (Opt)</label>
+                        <input type="time" id="task-time">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary full-width">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="task-detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Task Details</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div id="task-detail-body"></div>
+            <div class="modal-footer" style="margin-top:1.5rem; display:flex; gap:0.5rem; justify-content:flex-end;">
+                <button id="detail-delete-btn" class="btn btn-secondary" style="color:#dc2626"><i class="fas fa-trash"></i> Delete</button>
+                <button id="detail-edit-btn" class="btn btn-secondary"><i class="fas fa-edit"></i> Edit</button>
+                <button id="detail-complete-btn" class="btn btn-primary">Complete</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="day-view-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="day-view-title">Tasks</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div id="day-task-list" class="day-task-list"></div>
+        </div>
+    </div>
+
+    <div id="routine-modal" class="modal">
+        <div class="modal-content routine-modal-content">
+            <div class="modal-header">
+                <h2>Routine Manager</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="routine-semester-ctrl">
+                <select id="semester-select"></select>
+                <button id="add-semester-btn" class="btn btn-secondary"><i class="fas fa-plus"></i></button>
+            </div>
+            <div class="day-selector">
+                <button class="day-tab active" data-day="Saturday">Sat</button>
+                <button class="day-tab" data-day="Sunday">Sun</button>
+                <button class="day-tab" data-day="Monday">Mon</button>
+                <button class="day-tab" data-day="Tuesday">Tue</button>
+                <button class="day-tab" data-day="Wednesday">Wed</button>
+                <button class="day-tab" data-day="Thursday">Thu</button>
+            </div>
+            <div class="routine-list" id="routine-list"></div>
+            <button id="add-class-btn" class="btn btn-primary full-width" style="margin-top:1rem;"><i class="fas fa-plus"></i> Add Class</button>
+        </div>
+    </div>
+
+    <div id="add-class-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="class-modal-title">Add Class</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="class-form">
+                <input type="hidden" id="edit-class-id">
+                <div class="form-group">
+                    <label>Course Name</label>
+                    <input type="text" id="class-course" required placeholder="e.g. Data Structures">
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Start</label><input type="time" id="class-start" required></div>
+                    <div class="form-group"><label>End</label><input type="time" id="class-end" required></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Section (Opt)</label>
+                        <input type="text" id="class-section" placeholder="e.g. A1">
+                    </div>
+                    <div class="form-group">
+                        <label>Room (Opt)</label>
+                        <input type="text" id="class-room" placeholder="e.g. 402C">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Faculty Name (Opt)</label>
+                    <input type="text" id="class-faculty" placeholder="e.g. Dr. Smith">
+                </div>
+                <button type="submit" id="class-form-btn" class="btn btn-primary full-width">Add to Routine</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
